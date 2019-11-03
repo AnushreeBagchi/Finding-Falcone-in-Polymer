@@ -14,10 +14,15 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '@polymer/polymer/lib/elements/dom-if.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
+import '@polymer/iron-image/iron-image.js';
+import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
+import '@polymer/paper-item/paper-item.js';
+import '@polymer/paper-listbox/paper-listbox.js';
+import {} from '@polymer/polymer/lib/elements/dom-repeat.js';
 import { setPassiveTouchGestures } from '@polymer/polymer/lib/utils/settings';
 
 class StartPolymer3 extends PolymerElement {
-  static get properties () {
+  static get properties() {
     return {
       message: {
         type: String,
@@ -45,17 +50,17 @@ class StartPolymer3 extends PolymerElement {
     this.message = 'Hello World! I\'m a Polymer element :)';
   }
 
-  ready(){
+  ready() {
     // If you override ready, always call super.ready() first.
     super.ready();
     // Output the custom element's HTML tag to the browser console.
     // Open your browser's developer tools to view the output.
     console.log(this.tagName);
-    this.$.omgpie.focus();
+
   }
-  
-  togglePie(){
-    if(this.pie && !this.loadComplete) {
+
+  togglePie() {
+    if (this.pie && !this.loadComplete) {
       // See https://developers.google.com/web/updates/2017/11/dynamic-import
       import('./lazy-element.js').then((LazyElement) => {
         console.log("LazyElement loaded");
@@ -66,26 +71,62 @@ class StartPolymer3 extends PolymerElement {
     }
   }
 
-  static get template () {
+  static get template() {
     // Template getter must return an instance of HTMLTemplateElement.
     // The html helper function makes this easy.
     return html`
       <style>
-        paper-checkbox {
-          --paper-checkbox-checked-ink-color: #FFFFFF;
-          --paper-checkbox-unchecked-ink-color: #FFFFFF;
+        .images {
+          width: var(--iron-image-width, 1200px);
+          height: var(--iron-image-height, 250px);
+          background-color: lightgray;
         }
       </style>
 
-      <h1>Start Polymer 3.0</h1>
-      <p>[[message]]</p>
-      <paper-checkbox id="omgpie"
-        toggles
-        noink
-        checked={{pie}}>I like pie.</paper-checkbox>
-      <template is="dom-if" if=[[pie]]>
-        <lazy-element><p>lazy loading...</p></lazy-element>
-      </template>
+      <h1>Finding Falcone</h1>
+      <iron-image class="images" src = "src/images/planets.png" preload sizing = "cover"></iron-image>
+      <iron-image class="images" src = "src/images/spaceship.png" preload sizing = "cover"></iron-image>
+
+
+
+      <h3>Select planets you want to search in:</h3>
+      <paper-dropdown-menu label = "Planet">
+        <paper-listbox slot="dropdown-content">
+          <paper-item>Item1</paper-item>
+          <paper-item>Item2</paper-item>
+          <paper-item>Item3</paper-item>
+        </paper-listbox> 
+      </paper-dropdown-menu>
+
+      <h3>Select planets you want to search in:</h3>
+      <paper-dropdown-menu label = "Planet">
+        <paper-listbox slot="dropdown-content">
+          <paper-item>Item1</paper-item>
+          <paper-item>Item2</paper-item>
+          <paper-item>Item3</paper-item>
+        </paper-listbox> 
+      </paper-dropdown-menu>
+
+      <h3>Select planets you want to search in:</h3>
+      <paper-dropdown-menu label = "Planet">
+        <paper-listbox slot="dropdown-content">
+          <paper-item>Item1</paper-item>
+          <paper-item>Item2</paper-item>
+          <paper-item>Item3</paper-item>
+        </paper-listbox> 
+      </paper-dropdown-menu>
+
+      <h3>Select planets you want to search in:</h3>
+      <paper-dropdown-menu label = "Planet">
+        <paper-listbox slot="dropdown-content">
+          <paper-item>Item1</paper-item>
+          <paper-item>Item2</paper-item>
+          <paper-item>Item3</paper-item>
+        </paper-listbox> 
+      </paper-dropdown-menu>
+
+      
+      
     `;
   }
 }
