@@ -1,11 +1,11 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/start-polymer3.js",
+  "shell": "src/components/rock-find-falcone.js",
   "fragments": [
     "src/lazy-element.js"
   ],
   "sources": [
-   "src/start-polymer3.js",
+   "src/components/rock-find-falcone.js",
    "manifest/**",
    "package.json"
   ],

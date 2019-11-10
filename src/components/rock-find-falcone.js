@@ -1,20 +1,6 @@
-/**
- * @license
- * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
- */
-
-// Import statements in Polymer 3.0 can now use package names.
-// polymer-element.js now exports PolymerElement instead of Element,
-// so no need to change the symbol. 
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '@polymer/polymer/lib/elements/dom-if.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
-import '@polymer/iron-image/iron-image.js';
 import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
 import '@polymer/paper-item/paper-item.js';
 import '@polymer/paper-listbox/paper-listbox.js';
@@ -22,10 +8,15 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import { } from '@polymer/polymer/lib/elements/dom-repeat.js';
 import { setPassiveTouchGestures } from '@polymer/polymer/lib/utils/settings';
+import '../components/pebble-image.js';
 
-class StartPolymer3 extends PolymerElement {
+class FindFalcone extends PolymerElement {
   static get properties() {
     return {
+      spaceshipImage: {
+        type: String,
+        value: "src/images/spaceship.png"
+      },
       message: {
         type: String,
         value: ''
@@ -46,47 +37,27 @@ class StartPolymer3 extends PolymerElement {
         type: Array
       },
       requestBody : {
-        type: Object,
-        value : function(){
-          return {
-            "token": "",
-            "planet_names": [],
-            "vehicle_names": []
-        } 
-        }
+        type: Object
       }  
     }
   }
 
   constructor() {
-    // If you override the constructor, always call the 
-    // superconstructor first.
     super();
-    // Resolve warning about scroll performance 
-    // See https://developers.google.com/web/updates/2016/06/passive-event-listeners
     setPassiveTouchGestures(true);
     this.message = 'Hello World! I\'m a Polymer element :)';
     this.getPlanets();
     this.getVehicle();    
   }
 
-  ready() {
-    // If you override ready, always call super.ready() first.
-    super.ready();
-    // Output the custom element's HTML tag to the browser console.
-    // Open your browser's developer tools to view the output.
-    console.log(this.tagName);  
-  }  
-
   getPlanets() {    
     return fetch('https://findfalcone.herokuapp.com/planets').then(function (response) {      
       return response.json();
     }).then(data => {
       this.planets = data;
-      this.destinationList[0].planets = data;
-      this.destinationList[1].planets = data;
-      this.destinationList[2].planets = data;
-      this.destinationList[3].planets = data;           
+      for(let i=0; i<this.destinationList.length; i++) {
+        this.destinationList[i].planets = data;
+      }           
       return this.planets;
     }).catch(err => window.alert(err));
   }
@@ -96,16 +67,21 @@ class StartPolymer3 extends PolymerElement {
       return response.json();
     }).then(data=> {
       this.vehicle =  data;
-      this.destinationList[0].vehicle = data;
-      this.destinationList[1].vehicle = data;
-      this.destinationList[2].vehicle = data;
-      this.destinationList[3].vehicle = data;       
+      for(let i = 0; i< this.destinationList.length ; i++) {
+        this.destinationList[i].vehicle = data;
+      }    
       return this.vehicle;
     }).catch(err=> window.alert(err));
   }
 
-  getToken() {
-    this.requestBody.token =  fetch('https://findfalcone.herokuapp.com/token', {
+  async getToken() {
+    this.requestBody = {
+        "token": "",
+        "planet_names": [],
+        "vehicle_names": []
+    }; 
+  
+    let token =  await fetch('https://findfalcone.herokuapp.com/token', {
       method: 'POST',
       headers: {
           'Accept': 'application/json',
@@ -116,23 +92,40 @@ class StartPolymer3 extends PolymerElement {
     })
     .catch(err=>window.alert(err));
 
+    this.requestBody.token = token.token;
+
     this.getRequestBody();
   }
 
   getRequestBody() { 
-    for(let destination=0; destination <this.destinationList.length; destination++){
+    for(let destination = 0; destination < this.destinationList.length; destination++){
       let current = this.destinationList[destination];
-      this.requestBody.planet_names.push(current.planets[current.selectedPlanetIndex]);      
+      this.requestBody.planet_names.push(current.planets[current.selectedPlanetIndex].name);
+      this.requestBody.vehicle_names.push(current.vehicle[current.selectedVehicleIndex].name);      
     }
-    // this.requestBody.planet_names = [];
-    // this.vehicle_names = [];
-    // console.log(this.requestBody);
+    this.getFalcone();
      
   }
 
+  async getFalcone(){
+    let response = await fetch('https://findfalcone.herokuapp.com/find', {
+      method: 'POST',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(this.requestBody)
+    }).then((r) => {           
+      return r.json(); 
+    })
+    .catch(err=>window.alert(err));
+
+    if(response.status == 'success'){
+      console.log("success");
+    }
+  }
+
   static get template() {
-    // Template getter must return an instance of HTMLTemplateElement.
-    // The html helper function makes this easy.
     return html`
       <style>
         .images {
@@ -147,7 +140,8 @@ class StartPolymer3 extends PolymerElement {
 
       <h1>Finding Falcone</h1>
       
-          
+        <pebble-image src={{spaceshipImage}}></pebble-image> 
+      
       <dom-repeat items="{{destinationList}}" as="list">
         <template>
         <div id= "destination-list">
@@ -167,7 +161,7 @@ class StartPolymer3 extends PolymerElement {
             <paper-listbox  slot="dropdown-content" selected = {{list.selectedVehicleIndex}}>
               <dom-repeat items="{{vehicle}}" as="vehicle" >
                 <template>
-                  <paper-item>"{{vehicle.name}}"</paper-item>                  
+                  <paper-item>"{{vehicle.name}}"</paper-items>                  
                 </template>
               </dom-repeat>
             </paper-listbox>
@@ -175,32 +169,12 @@ class StartPolymer3 extends PolymerElement {
           </div>
         </template>
       </dom-repeat>
-
-      <div>Planets selected are 
-        <dom-repeat items="{{destinationList}}" as="list">
-          <template><span>{{list.selectedVehicleIndex}}</span></template>
-        </dom-repeat>
-      </div>
-
-      <paper-button raised on-click='getToken' id='findBtn'>Find Falcone</paper-button>
-
+      <paper-button raised on-click='getToken' id='findBtn'>Find Falcone</paper-button>      
       
-    `;
+      `;
   }
 }
-
-// Register the element with the browser.
-customElements.define('start-polymer3', StartPolymer3);
+customElements.define('find-falcone', FindFalcone);
 
 {/* <iron-image class="images" src = "src/images/spaceship.png" preload sizing = "cover"></iron-image> */}
 {/* <iron-image class="images" src = "src/images/planets.png" preload sizing = "cover"></iron-image> */}
-{/* <span>Select Vehicle</span>
-          <paper-dropdown-menu label ="Vehicle">
-            <paper-listbox>
-              <dom-repeat items="{{vehicle}}" as="vehicle" >
-                <template>
-                  <paper-item>"{{vehicle.name}}"</paper-item>                  
-                </template>
-              </dom-repeat>
-            </paper-listbox>
-          <paper-dropdown-menu>  */}

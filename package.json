@@ -1,7 +1,7 @@
 {
   "name": "start-polymer3",
   "version": "3.0.0",
-  "main": "src/start-polymer3.js",
+  "main": "src/component/rock-find-falcone.js",
   "repository": "https://github.com/PolymerLabs/start-polymer3.git",
   "author": "The Polymer Project Authors",
   "license": "BSD-3-Clause",
