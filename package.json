@@ -6,7 +6,9 @@
   "author": "The Polymer Project Authors",
   "license": "BSD-3-Clause",
   "dependencies": {
+    "@polymer/iron-flex-layout": "^3.0.1",
     "@polymer/iron-image": "^3.0.2",
+    "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-checkbox": "latest",
     "@polymer/paper-dropdown-menu": "^3.0.1",
     "@polymer/paper-item": "^3.0.1",
