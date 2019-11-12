@@ -1,14 +1,12 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '@polymer/polymer/lib/elements/dom-if.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
-import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
-import '@polymer/paper-item/paper-item.js';
-import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import { } from '@polymer/polymer/lib/elements/dom-repeat.js';
 import { setPassiveTouchGestures } from '@polymer/polymer/lib/utils/settings';
 import '../components/pebble-image.js';
+import '../components/pebble-dropdown';
 
 class FindFalcone extends PolymerElement {
   static get properties() {
@@ -38,7 +36,17 @@ class FindFalcone extends PolymerElement {
       },
       requestBody : {
         type: Object
-      }  
+      }, 
+      searchResponse : {
+        type: Object,
+        value: function(){
+          return {}
+        }
+      },
+      searchStatus : {
+        type: Boolean,
+        value: false
+      }       
     }
   }
 
@@ -55,9 +63,9 @@ class FindFalcone extends PolymerElement {
       return response.json();
     }).then(data => {
       this.planets = data;
-      for(let i=0; i<this.destinationList.length; i++) {
-        this.destinationList[i].planets = data;
-      }           
+      // for(let i=0; i<this.destinationList.length; i++) {
+      //   this.destinationList[i].planets = data;
+      // }           
       return this.planets;
     }).catch(err => window.alert(err));
   }
@@ -120,10 +128,16 @@ class FindFalcone extends PolymerElement {
     })
     .catch(err=>window.alert(err));
 
+    this.searchResponse = response;
+    this.searchStatus = (response.status == 'success');
     if(response.status == 'success'){
       console.log("success");
     }
   }
+
+  _isPlanetSelected(index){
+    return (index > -1);
+  } 
 
   static get template() {
     return html`
@@ -132,49 +146,43 @@ class FindFalcone extends PolymerElement {
           width: var(--iron-image-width, 1200px);
           height: var(--iron-image-height, 250px);
           background-color: lightgray;
-        },
-        #destination-list {
-          display: flex
         }
+
+        .header {
+          padding: 10px;
+          justify-content: center;
+          display: flex;
+          color: #2D2D2D;
+        }      
       </style>
 
-      <h1>Finding Falcone</h1>
+      <h1 class="header">FINDING FALCONE !!</h1>
       
-        <pebble-image src={{spaceshipImage}}></pebble-image> 
+      <pebble-image image-url="src/images/spaceship.png"></pebble-image>
+      <pebble-image image-url="src/images/planets.png"></pebble-image>  
       
+      <template is="dom-if" if={{!searchStatus}}>
       <dom-repeat items="{{destinationList}}" as="list">
         <template>
         <div id= "destination-list">
-          <span>Select {{list.destinationName}}: </span>     
-          <paper-dropdown-menu label ="Planets">
-            <paper-listbox slot="dropdown-content" selected = {{list.selectedPlanetIndex}} >                       
-              <dom-repeat items="{{planets}}" as="planets" >
-                <template>
-                  <paper-item>"{{planets.name}}"</paper-item>                  
-                </template>
-              <dom-repeat>  
-            </paper-listbox>
-          </paper-dropdown-menu>
-
-          <span>Select Vehicle</span>
-          <paper-dropdown-menu label ="Vehicle">
-            <paper-listbox  slot="dropdown-content" selected = {{list.selectedVehicleIndex}}>
-              <dom-repeat items="{{vehicle}}" as="vehicle" >
-                <template>
-                  <paper-item>"{{vehicle.name}}"</paper-items>                  
-                </template>
-              </dom-repeat>
-            </paper-listbox>
-          </paper-dropdown-menu> 
+          <span>Select {{list.destinationName}}: </span>
+          
+          <pebble-dropdown label="Planets" selected-index={{list.selectedPlanetIndex}} dropdown-items={{planets}}> </pebble-dropdown>
+          <template is="dom-if" if="{{_isPlanetSelected(list.selectedPlanetIndex)}}"> 
+            <span>Select Vehicle</span>
+            <pebble-dropdown label="Vehicle" selected-index={{list.selectedVehicleIndex}} dropdown-items={{vehicle}}></pebble-dropdown>
+          </template> 
           </div>
         </template>
       </dom-repeat>
-      <paper-button raised on-click='getToken' id='findBtn'>Find Falcone</paper-button>      
+      <paper-button raised on-click='getToken' id='findBtn'>Find Falcone</paper-button>
+      </template>
       
+      <template is="dom-if" if={{searchStatus}}>
+        <h1 class="header">Congratulations</h1>
+        <h1 class="header">Falcone found in {{searchResponse.planet_name}}</h1>
+      </template>      
       `;
   }
 }
 customElements.define('find-falcone', FindFalcone);
-
-{/* <iron-image class="images" src = "src/images/spaceship.png" preload sizing = "cover"></iron-image> */}
-{/* <iron-image class="images" src = "src/images/planets.png" preload sizing = "cover"></iron-image> */}

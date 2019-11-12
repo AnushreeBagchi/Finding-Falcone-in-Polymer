@@ -5,25 +5,22 @@ import '@polymer/iron-image/iron-image.js';
 class PebbleImage extends PolymerElement {
   static get properties() {
     return {
-       src: {
+       imageUrl: {
            type: String
        }
     }
   }
 
-  constructor() {
-    super();
-    this.printsrc();   
-  }
-
-  printsrc(){
-    console.log(this.src);
-  }
-
   static get template() {
     return html`
-        <iron-image class="images"  alt="text" preload sizing = "cover"></iron-image> 
-                `;
+        <style>
+            #img {
+                width: var(--iron-image-width, 1350px);
+                height: var(--iron-image-height, 300px);
+            }
+        </style>
+        <iron-image id="img" src={{imageUrl}} alt="text" preload sizing = "cover"></iron-image> 
+        `;
   }
 }
 customElements.define('pebble-image', PebbleImage);
