@@ -36,11 +36,16 @@ class PebbleDropdown extends PolymerElement {
     return html`
         <style>
             #menu {
-                padding : 10px;
+                margin: 10px;
+                padding-left : 15px;
+                padding-right : 15px;
+                border-radius : 30px;
+                background: -webkit-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#a1dbff 100%); 
             }
+
         </style>
         <paper-dropdown-menu id="menu" label ={{label}}>
-            <paper-listbox slot="dropdown-content" selected = {{selectedIndex}}>
+            <paper-listbox id="list" slot="dropdown-content" selected = {{selectedIndex}}>
                 <dom-repeat items={{dropdownItems}}>
                     <template>
                         <paper-item>{{item.name}}</paper-item>                  

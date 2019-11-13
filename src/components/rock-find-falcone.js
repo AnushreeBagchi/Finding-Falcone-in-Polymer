@@ -22,10 +22,7 @@ class FindFalcone extends PolymerElement {
       destinationList: {
         type: Array,
         value : function(){
-          return [{"destinationName":"Destination1","selectedPlanetIndex": -1,"selectedVehicleIndex":-1},
-                  {"destinationName":"Destination2","selectedPlanetIndex": -1,"selectedVehicleIndex":-1},
-                  {"destinationName":"Destination3","selectedPlanetIndex": -1,"selectedVehicleIndex":-1},
-                  {"destinationName":"Destination4","selectedPlanetIndex": -1,"selectedVehicleIndex":-1}]
+          return [{"destinationName":"Destination1","selectedPlanetIndex": -1,"selectedVehicleIndex":-1}]
         }
       },
       planets: {
@@ -63,9 +60,9 @@ class FindFalcone extends PolymerElement {
       return response.json();
     }).then(data => {
       this.planets = data;
-      // for(let i=0; i<this.destinationList.length; i++) {
-      //   this.destinationList[i].planets = data;
-      // }           
+      for(let i=0; i<this.destinationList.length; i++) {
+          this.destinationList[i].planets = data;
+        }                
       return this.planets;
     }).catch(err => window.alert(err));
   }
@@ -135,9 +132,40 @@ class FindFalcone extends PolymerElement {
     }
   }
 
-  _isPlanetSelected(index){
-    return (index > -1);
-  } 
+  isDestinationSelected(index){
+    let dropDownSelected = (index > -1);
+    //Add destinations to destinationlist     
+    let planetList=[], vehicleList=[];
+    if(dropDownSelected && this.destinationList.length < 4) {      
+      for(let i=0;i<this.planets.length;i++){
+        if(!this.planets[i].selected){
+          planetList.push(this.planets[i]);
+        }
+      }
+      for(let i=0;i<this.vehicle.length;i++){
+        if(!this.vehicle[i].selected){
+          vehicleList.push(this.vehicle[i]);
+        }
+      }
+      vehicleList =  this.vehicle;
+      this.push('destinationList', {
+        "destinationName":"Destination1",
+        "selectedPlanetIndex": -1,
+        "selectedVehicleIndex":-1,
+        planets: planetList,
+        vehicle: vehicleList
+      });
+    }    
+    return dropDownSelected;
+  }
+  
+  isPreviousDestinationSelected(list) {    
+    return true;
+  }
+
+  onRefresh(){
+    
+  }
 
   static get template() {
     return html`
@@ -152,30 +180,42 @@ class FindFalcone extends PolymerElement {
           padding: 10px;
           justify-content: center;
           display: flex;
-          color: #2D2D2D;
-        }      
+          color: #B4E3FE;
+          
+        }  
+        #findBtn,#refresh {
+          padding: 10px;
+          width: 200px;
+          left: 30%;
+          border-radius : 30px;
+          background: -webkit-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#a1dbff 100%); 
+        }    
       </style>
 
       <h1 class="header">FINDING FALCONE !!</h1>
-      
+
       <pebble-image image-url="src/images/spaceship.png"></pebble-image>
-      <pebble-image image-url="src/images/planets.png"></pebble-image>  
-      
+      <pebble-image image-url="src/images/planets.png"></pebble-image>
+
       <template is="dom-if" if={{!searchStatus}}>
-      <dom-repeat items="{{destinationList}}" as="list">
-        <template>
-        <div id= "destination-list">
-          <span>Select {{list.destinationName}}: </span>
-          
-          <pebble-dropdown label="Planets" selected-index={{list.selectedPlanetIndex}} dropdown-items={{planets}}> </pebble-dropdown>
-          <template is="dom-if" if="{{_isPlanetSelected(list.selectedPlanetIndex)}}"> 
-            <span>Select Vehicle</span>
-            <pebble-dropdown label="Vehicle" selected-index={{list.selectedVehicleIndex}} dropdown-items={{vehicle}}></pebble-dropdown>
-          </template> 
-          </div>
-        </template>
-      </dom-repeat>
-      <paper-button raised on-click='getToken' id='findBtn'>Find Falcone</paper-button>
+        <dom-repeat items="{{destinationList}}" as="list">
+          <template>
+            <div id="destination-list">
+              <span>Select {{list.destinationName}}: </span>
+              
+                <pebble-dropdown label="Planets" selected-index={{list.selectedPlanetIndex}} dropdown-items={{planets}}>
+                </pebble-dropdown>
+              
+              <template is="dom-if" if="{{isDestinationSelected(list.selectedPlanetIndex)}}">
+                <span>Select Vehicle</span>
+                <pebble-dropdown label="Vehicle" selected-index={{list.selectedVehicleIndex}}
+                  dropdown-items={{vehicle}}></pebble-dropdown>
+              </template>
+            </div>
+          </template>
+        </dom-repeat>
+        <paper-button raised on-click='getToken' id='findBtn'>Find Falcone</paper-button>
+        <paper-button raised on-click='onRefresh' id='refresh'>Refresh selection</paper-button>
       </template>
       
       <template is="dom-if" if={{searchStatus}}>
