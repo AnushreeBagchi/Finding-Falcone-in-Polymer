@@ -9,20 +9,89 @@ import '../components/pebble-image.js';
 import '../components/pebble-dropdown';
 
 class FindFalcone extends PolymerElement {
+  static get template() {
+    return html`
+      <style>
+        .images {
+          width: var(--iron-image-width, 1200px);
+          height: var(--iron-image-height, 250px);
+          background-color: lightgray;
+        }
+
+        .header {
+          padding: 10px;
+          justify-content: center;
+          display: flex;
+          color: #B4E3FE;
+          
+        }  
+        #findBtn,#refresh {
+          padding: 10px;
+          width: 200px;
+          left: 30%;
+          border-radius : 30px;
+          background: -webkit-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#a1dbff 100%); 
+        }    
+
+        #search {
+          padding: 10px;
+          border-radius : 30px;
+          background: -webkit-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#a1dbff 100%);           
+          display: flex;
+          justify-content : center;
+          margin-top : 20px;
+        }
+      </style>
+
+      <h1 class="header">FINDING FALCONE !!</h1>
+
+      <template is="dom-if" if={{!startSearch}}>
+        <pebble-image image-url="src/images/spaceship.png"></pebble-image>
+        <pebble-image image-url="src/images/planets.png"></pebble-image>
+        <paper-button raised on-click='onStartSearch' id='search'>Start Search</paper-button>
+      </template>
+
+      <template is="dom-if" if={{startSearch}}>
+        <template is="dom-if" if={{!searchStatus}}>
+          <dom-repeat items="{{destinationList}}" as="list">
+            <template>
+              <div id="destination-list">
+                <span>Select Destination: </span>
+
+                <pebble-dropdown label="Planets" selected-index={{list.selectedPlanetIndex}}
+                  dropdown-items={{list.planets}}>
+                </pebble-dropdown>
+
+                <template is="dom-if" if="{{isDestinationSelected(list.selectedPlanetIndex)}}">
+                  <span>Select Vehicle</span>
+                  <pebble-dropdown label="Vehicle" selected-index={{list.selectedVehicleIndex}}
+                    dropdown-items={{list.vehicle}}></pebble-dropdown>
+                </template>
+              </div>
+            </template>
+          </dom-repeat>
+          <paper-button raised on-click='getToken' id='findBtn'>Find Falcone</paper-button>
+          <paper-button raised on-click='onRefresh' id='refresh'>Refresh selection</paper-button>
+        </template>
+
+        <template is="dom-if" if={{searchStatus}}>
+          <h1 class="header">Congratulations</h1>
+          <h1 class="header">Falcone found in {{searchResponse.planet_name}}</h1>
+        </template>
+      </template>
+      `;
+  }
+
   static get properties() {
     return {
-      spaceshipImage: {
-        type: String,
-        value: "src/images/spaceship.png"
+      startSearch: {
+        type: Boolean,
+        value: false
       },
-      message: {
-        type: String,
-        value: ''
-      },      
       destinationList: {
         type: Array,
         value : function(){
-          return [{"destinationName":"Destination1","selectedPlanetIndex": -1,"selectedVehicleIndex":-1}]
+          return [{"selectedPlanetIndex": -1,"selectedVehicleIndex":-1}]
         }
       },
       planets: {
@@ -48,9 +117,7 @@ class FindFalcone extends PolymerElement {
   }
 
   constructor() {
-    super();
-    setPassiveTouchGestures(true);
-    this.message = 'Hello World! I\'m a Polymer element :)';
+    super();    
     this.getPlanets();
     this.getVehicle();    
   }
@@ -59,10 +126,8 @@ class FindFalcone extends PolymerElement {
     return fetch('https://findfalcone.herokuapp.com/planets').then(function (response) {      
       return response.json();
     }).then(data => {
-      this.planets = data;
-      for(let i=0; i<this.destinationList.length; i++) {
-          this.destinationList[i].planets = data;
-        }                
+      this.planets = data;      
+      this.destinationList[0].planets = data;        
       return this.planets;
     }).catch(err => window.alert(err));
   }
@@ -72,9 +137,7 @@ class FindFalcone extends PolymerElement {
       return response.json();
     }).then(data=> {
       this.vehicle =  data;
-      for(let i = 0; i< this.destinationList.length ; i++) {
-        this.destinationList[i].vehicle = data;
-      }    
+      this.destinationList[0].vehicle = data;         
       return this.vehicle;
     }).catch(err=> window.alert(err));
   }
@@ -108,8 +171,7 @@ class FindFalcone extends PolymerElement {
       this.requestBody.planet_names.push(current.planets[current.selectedPlanetIndex].name);
       this.requestBody.vehicle_names.push(current.vehicle[current.selectedVehicleIndex].name);      
     }
-    this.getFalcone();
-     
+    this.getFalcone();     
   }
 
   async getFalcone(){
@@ -146,10 +208,9 @@ class FindFalcone extends PolymerElement {
         if(!this.vehicle[i].selected){
           vehicleList.push(this.vehicle[i]);
         }
-      }
+      }      
       vehicleList =  this.vehicle;
-      this.push('destinationList', {
-        "destinationName":"Destination1",
+      this.push('destinationList', {        
         "selectedPlanetIndex": -1,
         "selectedVehicleIndex":-1,
         planets: planetList,
@@ -167,62 +228,10 @@ class FindFalcone extends PolymerElement {
     
   }
 
-  static get template() {
-    return html`
-      <style>
-        .images {
-          width: var(--iron-image-width, 1200px);
-          height: var(--iron-image-height, 250px);
-          background-color: lightgray;
-        }
-
-        .header {
-          padding: 10px;
-          justify-content: center;
-          display: flex;
-          color: #B4E3FE;
-          
-        }  
-        #findBtn,#refresh {
-          padding: 10px;
-          width: 200px;
-          left: 30%;
-          border-radius : 30px;
-          background: -webkit-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#a1dbff 100%); 
-        }    
-      </style>
-
-      <h1 class="header">FINDING FALCONE !!</h1>
-
-      <pebble-image image-url="src/images/spaceship.png"></pebble-image>
-      <pebble-image image-url="src/images/planets.png"></pebble-image>
-
-      <template is="dom-if" if={{!searchStatus}}>
-        <dom-repeat items="{{destinationList}}" as="list">
-          <template>
-            <div id="destination-list">
-              <span>Select {{list.destinationName}}: </span>
-              
-                <pebble-dropdown label="Planets" selected-index={{list.selectedPlanetIndex}} dropdown-items={{planets}}>
-                </pebble-dropdown>
-              
-              <template is="dom-if" if="{{isDestinationSelected(list.selectedPlanetIndex)}}">
-                <span>Select Vehicle</span>
-                <pebble-dropdown label="Vehicle" selected-index={{list.selectedVehicleIndex}}
-                  dropdown-items={{vehicle}}></pebble-dropdown>
-              </template>
-            </div>
-          </template>
-        </dom-repeat>
-        <paper-button raised on-click='getToken' id='findBtn'>Find Falcone</paper-button>
-        <paper-button raised on-click='onRefresh' id='refresh'>Refresh selection</paper-button>
-      </template>
-      
-      <template is="dom-if" if={{searchStatus}}>
-        <h1 class="header">Congratulations</h1>
-        <h1 class="header">Falcone found in {{searchResponse.planet_name}}</h1>
-      </template>      
-      `;
+  onStartSearch(){
+    this.startSearch = true;
   }
+
+  
 }
 customElements.define('find-falcone', FindFalcone);
