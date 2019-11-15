@@ -39,8 +39,7 @@ class PebbleDropdown extends PolymerElement {
                 margin: 10px;
                 padding-left : 15px;
                 padding-right : 15px;
-                border-radius : 30px;
-                background: -webkit-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#a1dbff 100%); 
+                border-radius : 30px;                
             }
 
         </style>

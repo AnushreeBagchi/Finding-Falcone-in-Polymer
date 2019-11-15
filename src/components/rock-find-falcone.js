@@ -22,63 +22,77 @@ class FindFalcone extends PolymerElement {
           padding: 10px;
           justify-content: center;
           display: flex;
-          color: #B4E3FE;
+          color: #3F51B5;
+          
           
         }  
         #findBtn,#refresh {
           padding: 10px;
           width: 200px;
           left: 30%;
-          border-radius : 30px;
-          background: -webkit-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#a1dbff 100%); 
+          border-radius : 30px;          
         }    
 
         #search {
           padding: 10px;
-          border-radius : 30px;
-          background: -webkit-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#a1dbff 100%);           
+          border-radius : 30px;          
           display: flex;
           justify-content : center;
           margin-top : 20px;
         }
+
+        paper-button.indigo {
+          background-color: var(--paper-indigo-500);
+          color: white;
+          --paper-button-raised-keyboard-focus: {            
+            color: white !important;
+          }          
+        }
+
+        .body{
+          font:400 15px Arial;
+        }
+
       </style>
 
-      <h1 class="header">FINDING FALCONE !!</h1>
+      <div class="body">
+          <h1 class="header">FINDING FALCONE !!</h1>
 
-      <template is="dom-if" if={{!startSearch}}>
-        <pebble-image image-url="src/images/spaceship.png"></pebble-image>
-        <pebble-image image-url="src/images/planets.png"></pebble-image>
-        <paper-button raised on-click='onStartSearch' id='search'>Start Search</paper-button>
-      </template>
+          <template is="dom-if" if={{!startSearch}}>
+            <pebble-image image-url="src/images/spaceship.png"></pebble-image>
+            <pebble-image image-url="src/images/planets.png"></pebble-image>
+            <paper-button raised on-click='onStartSearch' id='search' class="custom indigo">Start Search</paper-button>
+          </template>
 
-      <template is="dom-if" if={{startSearch}}>
-        <template is="dom-if" if={{!searchStatus}}>
-          <dom-repeat items="{{destinationList}}" as="list">
-            <template>
-              <div id="destination-list">
-                <span>Select Destination: </span>
+          
+            <template is="dom-if" if={{!searchStatus}}>
+              <dom-repeat items="{{destinationList}}" as="list">
+                <template>
+                  <div id="destination-list">
+                    <span>Select Destination: </span>
 
-                <pebble-dropdown label="Planets" selected-index={{list.selectedPlanetIndex}}
-                  dropdown-items={{list.planets}}>
-                </pebble-dropdown>
+                    <pebble-dropdown label="Planets" selected-index={{list.selectedPlanetIndex}}
+                      dropdown-items={{getDropdownList(planets)}}>
+                    </pebble-dropdown>
 
-                <template is="dom-if" if="{{isDestinationSelected(list.selectedPlanetIndex)}}">
-                  <span>Select Vehicle</span>
-                  <pebble-dropdown label="Vehicle" selected-index={{list.selectedVehicleIndex}}
-                    dropdown-items={{list.vehicle}}></pebble-dropdown>
+                    <template is="dom-if" if="{{isDestinationSelected(list.selectedPlanetIndex)}}">
+                      <span>Select Vehicle</span>
+                      <pebble-dropdown label="Vehicle" selected-index={{list.selectedVehicleIndex}}
+                        dropdown-items={{getDropdownList(vehicle)}}></pebble-dropdown>
+                    </template>
+                  </div>
                 </template>
-              </div>
+              </dom-repeat>
+              <paper-button raised on-click='getToken' id='findBtn' class="indigo custom">Find Falcone</paper-button>
+              <paper-button raised on-click='onRefresh' id='refresh' class="indigo custom">Refresh selection</paper-button>          
             </template>
-          </dom-repeat>
-          <paper-button raised on-click='getToken' id='findBtn'>Find Falcone</paper-button>
-          <paper-button raised on-click='onRefresh' id='refresh'>Refresh selection</paper-button>
-        </template>
 
-        <template is="dom-if" if={{searchStatus}}>
-          <h1 class="header">Congratulations</h1>
-          <h1 class="header">Falcone found in {{searchResponse.planet_name}}</h1>
-        </template>
-      </template>
+            <template is="dom-if" if={{searchStatus}}>
+              <h1 class="header">Congratulations</h1>
+              <h1 class="header">Falcone found in {{searchResponse.planet_name}}</h1>
+            </template>
+          
+      </div>
       `;
   }
 
@@ -196,32 +210,26 @@ class FindFalcone extends PolymerElement {
 
   isDestinationSelected(index){
     let dropDownSelected = (index > -1);
-    //Add destinations to destinationlist     
-    let planetList=[], vehicleList=[];
-    if(dropDownSelected && this.destinationList.length < 4) {      
-      for(let i=0;i<this.planets.length;i++){
-        if(!this.planets[i].selected){
-          planetList.push(this.planets[i]);
-        }
-      }
-      for(let i=0;i<this.vehicle.length;i++){
-        if(!this.vehicle[i].selected){
-          vehicleList.push(this.vehicle[i]);
-        }
-      }      
-      vehicleList =  this.vehicle;
-      this.push('destinationList', {        
-        "selectedPlanetIndex": -1,
-        "selectedVehicleIndex":-1,
-        planets: planetList,
-        vehicle: vehicleList
-      });
-    }    
+    //Add destinations to destinationlist         
+    if(dropDownSelected && this.destinationList.length < 4) {
+      this.push('destinationList',{"selectedPlanetIndex": -1,"selectedVehicleIndex":-1} )
+    }
     return dropDownSelected;
   }
-  
-  isPreviousDestinationSelected(list) {    
-    return true;
+
+  getDropdownList(item){  
+    
+    let dropdownItems= [];
+    for (let i=0; i< item.length;i++){
+      if(!item[i].selected){
+        dropdownItems.push(item[i])
+      }
+    }
+    return dropdownItems;
+  }
+
+  onDropdownClick() {
+    debugger;
   }
 
   onRefresh(){
