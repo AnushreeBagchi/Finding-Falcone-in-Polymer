@@ -69,11 +69,12 @@ class FindFalcone extends PolymerElement {
               <dom-repeat items="{{destinationList}}" as="list">
                 <template>
                   <div id="destination-list">
-                    <span>Select Destination: </span>
-
-                    <pebble-dropdown label="Planets" selected-index={{list.selectedPlanetIndex}}
-                      dropdown-items={{getDropdownList(planets)}}>
-                    </pebble-dropdown>
+                    <template is="dom-if" if={{isPreviousVehicleSelected(destinationList)}}>
+                      <span>Select Destination: </span>
+                      <pebble-dropdown label="Planets"  selected-items={{getSelectedItems()}} selected-index={{list.selectedPlanetIndex}}
+                        dropdown-items={{getDropdownList(planets)}}>
+                      </pebble-dropdown>
+                    </template>
 
                     <template is="dom-if" if="{{isDestinationSelected(list.selectedPlanetIndex)}}">
                       <span>Select Vehicle</span>
@@ -105,8 +106,9 @@ class FindFalcone extends PolymerElement {
       destinationList: {
         type: Array,
         value : function(){
-          return [{"selectedPlanetIndex": -1,"selectedVehicleIndex":-1}]
-        }
+          return [{"index":0,"selectedPlanetIndex": -1,"selectedVehicleIndex":-1}]
+        },
+        observer:"onDestinationChange"
       },
       planets: {
         type: Array                
@@ -126,7 +128,7 @@ class FindFalcone extends PolymerElement {
       searchStatus : {
         type: Boolean,
         value: false
-      }       
+      }     
     }
   }
 
@@ -140,8 +142,7 @@ class FindFalcone extends PolymerElement {
     return fetch('https://findfalcone.herokuapp.com/planets').then(function (response) {      
       return response.json();
     }).then(data => {
-      this.planets = data;      
-      this.destinationList[0].planets = data;        
+      this.planets = data;
       return this.planets;
     }).catch(err => window.alert(err));
   }
@@ -151,7 +152,6 @@ class FindFalcone extends PolymerElement {
       return response.json();
     }).then(data=> {
       this.vehicle =  data;
-      this.destinationList[0].vehicle = data;         
       return this.vehicle;
     }).catch(err=> window.alert(err));
   }
@@ -212,9 +212,14 @@ class FindFalcone extends PolymerElement {
     let dropDownSelected = (index > -1);
     //Add destinations to destinationlist         
     if(dropDownSelected && this.destinationList.length < 4) {
-      this.push('destinationList',{"selectedPlanetIndex": -1,"selectedVehicleIndex":-1} )
+      this.push('destinationList',{"index":this.destinationList.length,"selectedPlanetIndex": -1,"selectedVehicleIndex":-1} )
     }
     return dropDownSelected;
+  }
+
+  isPreviousVehicleSelected(destinationList) {
+    // debugger;
+    return true;
   }
 
   getDropdownList(item){  
@@ -228,8 +233,20 @@ class FindFalcone extends PolymerElement {
     return dropdownItems;
   }
 
-  onDropdownClick() {
-    debugger;
+  getSelectedItems() {
+    let selectedItems = []; // clear selected items
+    for (let i=0; i< this.destinationList.length; i++){
+      if(this.destinationList[i].selectedPlanetIndex>-1){
+        let item = this.planets[this.destinationList[i].selectedPlanetIndex].name;        
+        selectedItems.push(item);
+      }     
+    }
+    return selectedItems;
+  }
+
+  onDestinationChange(){
+    // this.planets[destinationList[0].selectedPlanetIndex].name
+    // debugger;
   }
 
   onRefresh(){

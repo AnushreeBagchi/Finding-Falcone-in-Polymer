@@ -23,6 +23,12 @@ class PebbleDropdown extends PolymerElement {
            value: function(){
                return []
            }
+       },
+       selectedItems: {
+           type: Array,
+           value: function(){
+               return []
+           }
        }
     }
   }
@@ -55,10 +61,16 @@ class PebbleDropdown extends PolymerElement {
         `;
   }
 
-  selectedIndexChanged(){
-    if(this.selectedIndex > -1){
-        this.dropdownItems[this.selectedIndex].selected = true;
+    selectedIndexChanged() {
+        for (let i = 0; i < this.dropdownItems.length; i++) {              
+            if(this.selectedItems.indexOf(this.dropdownItems[i].name) == -1){
+                this.dropdownItems[i].selected = false;
+            }        
+        }
+        if (this.selectedIndex > -1) {
+            this.dropdownItems[this.selectedIndex].selected = true;
+        }
+
     }
-  }
 }
 customElements.define('pebble-dropdown', PebbleDropdown);
